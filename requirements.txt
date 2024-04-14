@@ -1,0 +1,18 @@
+# Python 3.11
+discopy  ==              1.1.6
+ibm-cloud-sdk-core==     3.19.2
+ibm-platform-services==  0.52.0
+lambeq==                 0.4.1
+nltk==                   3.8.1
+PennyLane    ==            0.35.1
+pytket       ==            1.25.0
+pytket-qir    ==           0.5.0
+pytket-qiskit    ==        0.48.0
+pytket-quantinuum   ==     0.30.0
+qiskit            ==       0.45.3
+qiskit-aer       ==        0.13.3
+qiskit-algorithms    ==    0.2.2
+qiskit-ibm-provider  ==    0.8.0
+qiskit-ibm-runtime  ==     0.17.0
+qiskit-terra     ==        0.45.3
+datasets
