@@ -1,4 +1,4 @@
 examples/*
 runs/*
-qnlp-binary-classification/*
+*qnlp-binary-classification*
 .ipynb_checkpoints/*
