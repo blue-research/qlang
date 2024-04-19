@@ -1,3 +1,4 @@
 examples/*
 runs/*
 qnlp-binary-classification/*
+.ipynb_checkpoints/*
