@@ -2,3 +2,5 @@ examples/*
 runs/*
 *qnlp-binary-classification*
 .ipynb_checkpoints/*
+algo-2.ipynb
+
