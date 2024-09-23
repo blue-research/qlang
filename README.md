@@ -12,3 +12,7 @@
 ## References
 - https://github.com/gamatos/qnlp-binary-classification
 - https://github.com/NEASQC/WP6_QNLP?tab=readme-ov-file
+
+## Notes
+1. Change mc_train to rc_train dataset
+2. Run experiments with different ansatz and organize results
