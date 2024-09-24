@@ -16,3 +16,4 @@
 ## Notes
 1. Change mc_train to rc_train dataset
 2. Run experiments with different ansatz and organize results
+3. Current goal is to establish a relationship between different ansatz methods and sentence representation.
