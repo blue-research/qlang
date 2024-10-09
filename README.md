@@ -1,4 +1,4 @@
-# qnlg - Quantum Natural Language Generation
+# Quantum language models
 
 ## Tasks
 1. Improve classification model's accuracy
