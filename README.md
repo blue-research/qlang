@@ -1,19 +1,20 @@
 # Quantum language models
 
-## Tasks
-1. Improve classification model's accuracy
-    - Change dataset from mc_train -> stanfordnlp/sst2 (larger dataset) <-! currently on hold due to parser not being able to parse complex sentences
-    - Test different ansatz and hyperparameters and rank them
-    - Test different classification model and hyperparameters and rank them
-2. Improve qnlg algorithm's accuracy (draft)
-    - Superposition for Sentence Generation: Create a superposition of multiple sentence states to evaluate them simultaneously, leveraging quantum parallelism. This requires a quantum circuit that can represent and manipulate sentences in superposition.
-    - Entanglement for Contextual Understanding: Design parts of the quantum circuit to entangle words or phrases, potentially capturing more nuanced, contextual relationships between them. This could lead to more accurate scoring and measure similarity of sentences.
+## Goals
+1. Create a systematic way to study the effects of sentence rewriters and ansatz algorithms.
+2. Interpret and explain the behavior of different combinations of rewriters and ansatz.
+3. Design a new ansatz algorithm (e.g., sentence length agnostic?)
 
-## References
-- https://github.com/gamatos/qnlp-binary-classification
-- https://github.com/NEASQC/WP6_QNLP?tab=readme-ov-file
+### Tasks
+1. Run experiments on both mc and rc dataset
+2. Plot both loss and accuracy
+3. Use HPC parallelism to speed things up
+4. Interpret experiment results
 
-## Notes
-1. Change mc_train to rc_train dataset
-2. Run experiments with different ansatz and organize results
-3. Current goal is to establish a relationship between different ansatz methods and sentence representation.
+### Study Resources
+- https://arxiv.org/abs/2211.00727
+- https://github.com/AminKaramlou/QNLG/blob/main/Imperial%20Workshop/workshop.ipynb
+- https://quantaggle.com/algorithms/ansatz/
+- https://github.com/QAMPspring2023/qgpt-issue-31/tree/main
+- https://github.com/lockwo/qml-library?tab=readme-ov-file#circuit-ansatz-
+
