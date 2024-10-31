@@ -8,3 +8,5 @@ import_test.ipynb
 slurm*
 *.swp
 run_test.sbatch
+*.log
+*.ipynb_checkpoints*
