@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=2
-#SBATCH --time=1:00:00
+#SBATCH --time=2:00:00
 #SBATCH --mem=8GB
 #SBATCH --job-name=quantum_experiment
 #SBATCH --array=0-15  # Adjust based on total combinations (4 Ansatzes * 4 Rewriters)
