@@ -9,14 +9,17 @@ from lambeq import AtomicType, IQPAnsatz, MPSAnsatz, Sim14Ansatz, Sim15Ansatz, S
 from lambeq.backend.tensor import Dim
 from pytket.extensions.qiskit import AerBackend
 from lambeq import TketModel, QuantumTrainer, SPSAOptimizer, BinaryCrossEntropyLoss, Dataset
+from datetime import datetime
 
 warnings.filterwarnings("ignore")
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
+# Define logging function for model training information
 def write_log(log, ansatz_name, rewriter_name):
-    print(str(log))
-    with open(f"./logs/{ansatz_name}_{rewriter_name}.log", "w") as f:
-        f.write(str(log))
+    print(str(log)) #stdout
+    log_path=f"{log_dir}/{ansatz_name}_{rewriter_name}.log"
+    with open(log_path, "a") as f:
+        f.write(f"{str(log)}\n")
         
 # Define data reading function
 def read_data(filename):
@@ -82,13 +85,13 @@ def train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz):
     val_dataset = Dataset(dev_circuits, dev_labels, shuffle=False)
 
     trainer.fit(train_dataset, val_dataset, log_interval=1)
-    return trainer.train_epoch_costs, trainer.val_costs
+    return trainer.train_epoch_costs, trainer.val_costs, trainer.train_eval_results['acc'], trainer.val_eval_results['acc']
 
 # Experiment and plot saving function
 def run_experiment_with_saving_plots():
     for i, ansatz in enumerate(ansatzes):
         ansatz_name = type(ansatz).__name__
-        fig, axs = plt.subplots(1, len(rewriters), figsize=(20, 5), sharex=True, sharey=True)
+        fig, axs = plt.subplots(2, len(rewriters), figsize=(20, 10), sharex=True, sharey=False)
 
         for j, rewriter in enumerate(rewriters):
             rewriter_name = rewriter.__name__
@@ -101,28 +104,46 @@ def run_experiment_with_saving_plots():
             test_circuits = [ansatz(diagram) for diagram in test_diagrams]
             all_circuits = train_circuits + dev_circuits + test_circuits
 
-            # Train model and retrieve losses
+            # Train model and retrieve losses and accuracies
             write_log(f"Training with {ansatz_name} and {rewriter_name}", ansatz_name, rewriter_name)
-            train_loss, val_loss = train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz)
-            write_log("Train loss:", ansatz_name, rewriter_name)
+            train_loss, val_loss, train_acc, val_acc = train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz)
+
+            # Log results
+            write_log("Train Loss:", ansatz_name, rewriter_name)
             write_log(train_loss, ansatz_name, rewriter_name)
-            write_log("Validation loss:", ansatz_name, rewriter_name)
+            write_log("Validation Loss:", ansatz_name, rewriter_name)
             write_log(val_loss, ansatz_name, rewriter_name)
+            write_log("Train Accuracy:", ansatz_name, rewriter_name)
+            write_log(train_acc, ansatz_name, rewriter_name)
+            write_log("Validation Accuracy:", ansatz_name, rewriter_name)
+            write_log(val_acc, ansatz_name, rewriter_name)
             
-            # Plotting losses on the designated subplot
-            axs[j].plot(train_loss, label="Training Loss")
-            axs[j].plot(val_loss, label="Validation Loss")
-            axs[j].set_title(f"{ansatz_name} with {rewriter_name}")
-            axs[j].legend()
+            # Plot losses
+            axs[0, j].plot(train_loss, label="Training Loss")
+            axs[0, j].plot(val_loss, label="Validation Loss")
+            axs[0, j].set_title(f"Loss: {ansatz_name} with {rewriter_name}")
+            axs[0, j].legend()
+
+            # Plot accuracies
+            axs[1, j].plot(train_acc, label="Training Accuracy")
+            axs[1, j].plot(val_acc, label="Validation Accuracy")
+            axs[1, j].set_title(f"Accuracy: {ansatz_name} with {rewriter_name}")
+            axs[1, j].legend()
 
         # Save the plot for the current Ansatz with all rewriters as a separate file
-        plt.suptitle(f"Loss Curves for {ansatz_name}")
-        filename = f"plots/{ansatz_name}_loss_plots.png"
+        plt.suptitle(f"Loss and Accuracy Curves for {ansatz_name}")
+        filename = f"{plot_dir}/{ansatz_name}_loss_accuracy_plots.png"
         plt.savefig(filename)
         plt.close(fig)
 
 # Main program
 if __name__ == '__main__':
+    current_time = datetime.now().strftime('%b%d_%H-%M-%S')
+    log_dir = os.path.join('logs', current_time)
+    plot_dir = os.path.join(log_dir, "plots")
+    os.makedirs(log_dir, exist_ok=True)
+    os.makedirs(plot_dir, exist_ok=True)
+    
     train_labels, train_data = read_data('datasets/mc_train_data.txt')
     dev_labels, dev_data = read_data('datasets/mc_dev_data.txt')
     test_labels, test_data = read_data('datasets/mc_test_data.txt')
