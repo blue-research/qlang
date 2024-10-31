@@ -89,12 +89,12 @@ def run_single_experiment(ansatz_index, rewriter_index):
     rewriter_name = rewriter.__name__
 
     # Prepare directory structure
-    plot_dir = os.path.join(log_dir, "plots", f"{ansatz_name}_{rewriter_name}")
+    plot_dir = os.path.join(log_dir, "plots")
     os.makedirs(plot_dir, exist_ok=True)
 
     # Log the start
     write_log(f"Starting training for {ansatz_name} with {rewriter_name}", ansatz_name, rewriter_name)
-    
+
     # Preprocess data
     train_diagrams = rewriter(raw_train_diagrams)
     dev_diagrams = rewriter(raw_dev_diagrams)
@@ -107,6 +107,16 @@ def run_single_experiment(ansatz_index, rewriter_index):
 
     # Train model and retrieve losses and accuracies
     train_loss, val_loss, train_acc, val_acc = train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz)
+
+    # Log results
+    write_log("Train Loss:", ansatz_name, rewriter_name)
+    write_log(train_loss, ansatz_name, rewriter_name)
+    write_log("Validation Loss:", ansatz_name, rewriter_name)
+    write_log(val_loss, ansatz_name, rewriter_name)
+    write_log("Train Accuracy:", ansatz_name, rewriter_name)
+    write_log(train_acc, ansatz_name, rewriter_name)
+    write_log("Validation Accuracy:", ansatz_name, rewriter_name)
+    write_log(val_acc, ansatz_name, rewriter_name)
 
     # Plot results
     fig, axs = plt.subplots(2, 1, figsize=(10, 8))
@@ -125,9 +135,8 @@ def run_single_experiment(ansatz_index, rewriter_index):
     plt.close(fig)
 
 if __name__ == '__main__':
-    current_time = datetime.now().strftime('%b%d_%H-%M')
-    print("Time: ", current_time)
-    log_dir = os.path.join('logs', current_time)
+    current_time = sys.argv[3]
+    log_dir = os.path.join('/scratch/jd5018/qlang/logs', current_time)
     os.makedirs(log_dir, exist_ok=True)
     
     # Load data and initialize parser

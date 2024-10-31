@@ -5,3 +5,6 @@ runs/*
 algo2.ipynb
 algo-2.ipynb
 import_test.ipynb
+slurm*
+*.swp
+run_test.sbatch
