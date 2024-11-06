@@ -6,10 +6,11 @@
 3. Design a new ansatz algorithm (e.g., sentence length agnostic?)
 
 ### Tasks
-1. Run experiments on both mc and rc dataset
-2. Plot both loss and accuracy
-3. Use HPC parallelism to speed things up
-4. Interpret experiment results
+1. Run experiments using a different number of layers.
+2. Run experiments on rc dataset
+3. Plot ansatz circuit
+4. Explain results (effects of normalization, rewriting it again)
+5. Discuss increasing the length of sentences (more parameters?)
 
 ### Study Resources
 - https://arxiv.org/abs/2211.00727
