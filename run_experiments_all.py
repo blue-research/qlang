@@ -66,7 +66,7 @@ def train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz):
     loss = BinaryCrossEntropyLoss()
     acc = lambda y_hat, y: np.sum(np.round(y_hat) == y) / len(y) / 2  # half due to double-counting
 
-    EPOCHS = 120
+    EPOCHS = 10
     BATCH_SIZE = 32
 
     trainer = QuantumTrainer(
@@ -85,7 +85,12 @@ def train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz):
     val_dataset = Dataset(dev_circuits, dev_labels, shuffle=False)
 
     trainer.fit(train_dataset, val_dataset, log_interval=1)
-    return trainer.train_epoch_costs, trainer.val_costs, trainer.train_eval_results['acc'], trainer.val_eval_results['acc']
+    return model, trainer.train_epoch_costs, trainer.val_costs, trainer.train_eval_results['acc'], trainer.val_eval_results['acc']
+
+def evaluate_model(model, test_circuits, test_labels):
+    acc = lambda y_hat, y: np.sum(np.round(y_hat) == y) / len(y) / 2
+    test_pred = model.get_diagram_output(test_circuits).tolist()
+    return acc(test_pred, test_labels)
 
 # Experiment and plot saving function
 def run_experiment_with_saving_plots():
@@ -106,16 +111,16 @@ def run_experiment_with_saving_plots():
 
             # Train model and retrieve losses and accuracies
             write_log(f"Training with {ansatz_name} and {rewriter_name}", ansatz_name, rewriter_name)
-            train_loss, val_loss, train_acc, val_acc = train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz)
-
+            model, train_loss, val_loss, train_acc, val_acc = train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz)
+            
             # Log results
-            write_log("Train Loss:", ansatz_name, rewriter_name)
+            write_log("Train Loss: ", ansatz_name, rewriter_name)
             write_log(train_loss, ansatz_name, rewriter_name)
-            write_log("Validation Loss:", ansatz_name, rewriter_name)
+            write_log("Validation Loss: ", ansatz_name, rewriter_name)
             write_log(val_loss, ansatz_name, rewriter_name)
-            write_log("Train Accuracy:", ansatz_name, rewriter_name)
+            write_log("Train Accuracy: ", ansatz_name, rewriter_name)
             write_log(train_acc, ansatz_name, rewriter_name)
-            write_log("Validation Accuracy:", ansatz_name, rewriter_name)
+            write_log("Validation Accuracy: ", ansatz_name, rewriter_name)
             write_log(val_acc, ansatz_name, rewriter_name)
             
             # Plot losses
@@ -129,6 +134,8 @@ def run_experiment_with_saving_plots():
             axs[1, j].plot(val_acc, label="Validation Accuracy")
             axs[1, j].set_title(f"Accuracy: {ansatz_name} with {rewriter_name}")
             axs[1, j].legend()
+            
+            write_log("Test Accuracy: ", evaluate_model(model, test_circuits, test_labels))
 
         # Save the plot for the current Ansatz with all rewriters as a separate file
         plt.suptitle(f"Loss and Accuracy Curves for {ansatz_name}")
