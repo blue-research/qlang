@@ -1,12 +1,14 @@
 examples/*
 runs/*
+logs/*
 *qnlp-binary-classification*
 .ipynb_checkpoints/*
 algo2.ipynb
 algo-2.ipynb
 import_test.ipynb
 slurm*
+circuit_rp.ipynb
+submit_jobs.sh
 *.swp
-run_test.sbatch
-*.log
+*.sbatch
 *.ipynb_checkpoints*
