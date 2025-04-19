@@ -12,3 +12,4 @@ submit_jobs.sh
 *.swp
 *.sbatch
 *.ipynb_checkpoints*
+papers/*
