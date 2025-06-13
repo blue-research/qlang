@@ -9,8 +9,15 @@ This repository contains the implementation and experimental framework used in t
   - Optional rewriting of diagrams (`re`, `re_norm`, `re_norm_cur`, `re_norm_cur_norm`)
   - Conversion into quantum circuits or tensor networks
 - Multiple ansätze supported:
-  - **Circuit-based**: IQPAnsatz, StronglyEntanglingAnsatz, Sim14Ansatz, Sim15Ansatz
-  - **Tensor-based**: MPSAnsatz, SpiderAnsatz, TensorAnsatz
+  - **Circuit-based**:
+    - IQPAnsatz
+    - StronglyEntanglingAnsatz
+    - Sim14Ansatz
+    - Sim15Ansatz
+  - **Tensor-based**:
+    - MPSAnsatz
+    - SpiderAnsatz
+    - TensorAnsatz
 - Hyperparameter exploration:
   - Number of layers
   - Single-qubit rotations
@@ -39,12 +46,12 @@ Best circuit-based performance: Sim14Ansatz + re_norm_cur_norm (100% validation 
 
 Best tensor-based performance: SpiderAnsatz + re (100% validation accuracy, lowest loss)
 
-Diagram simplification via rewriting significantly improves both convergence and generalization
+Diagram simplification via rewriting significantly improves both convergence and generalization for grammatically simple sentences.
 
-Careful hyperparameter tuning is key to optimal model design
+Careful hyperparameter tuning is key to optimal model design for the average sentence complexity of the dataset.
 
 ## 📚 Citation
-If you use this repository or results in your research, please cite:
+If you use this repository or the results in your research, please cite:
 
 ```
 @article{DelCastillo:2025edw,
@@ -60,6 +67,14 @@ If you use this repository or results in your research, please cite:
 
 📬 Contact
 For questions or collaborations, contact:
+
+Jordi Del Castillo
+
+Email: jordi.d@nyu.edu | jordi.delcastillo.1@gmail.com
+
+Dan Zhao
+
+Email: dz1158@nyu.edu
 
 Zongrui Pei
 
