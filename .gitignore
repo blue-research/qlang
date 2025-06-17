@@ -13,3 +13,4 @@ submit_jobs.sh
 *.sbatch
 *.ipynb_checkpoints*
 papers/*
+.DS_Store

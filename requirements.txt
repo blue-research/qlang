@@ -1,4 +1,7 @@
-# Python 3.11.5
 lambeq==0.4.0
-pytket==1.35.0
-
+pytket==2.6.0
+pandas==2.3.0
+numpy==2.2.1
+pytket-quantinuum==0.48.0
+pytket-qiskit==0.68.0
+discopy==1.2.0

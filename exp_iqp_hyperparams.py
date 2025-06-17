@@ -4,7 +4,6 @@ import warnings
 import os
 import sys
 import matplotlib.pyplot as plt
-from datasets import load_dataset
 from lambeq import BobcatParser, Rewriter, RemoveCupsRewriter
 from lambeq import AtomicType, IQPAnsatz, MPSAnsatz, Sim14Ansatz, Sim15Ansatz, SpiderAnsatz, StronglyEntanglingAnsatz, TensorAnsatz
 from lambeq.backend.tensor import Dim

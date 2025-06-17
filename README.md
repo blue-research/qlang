@@ -2,7 +2,7 @@
 
 This repository contains the implementation and experimental framework used in the study _"Comparative study of the ansätze in quantum language models"_. The research explores how different ansätze and hyperparameters influence Quantum Natural Language Processing (QNLP) models for text classification tasks. It evaluates both circuit-based and tensor-based approaches using the Lambeq library and quantum simulation backends.
 
-## 🔬 Features
+## Introduction
 
 - Full QNLP pipeline with:
   - Sentence-to-diagram conversion via pregroup grammar
@@ -25,10 +25,12 @@ This repository contains the implementation and experimental framework used in t
   - Training/validation loss and accuracy
   - Overfitting and convergence trends
   - Test performance comparison
- 
-## 🧪 Running the Experiments
+
+## Running the Experiments
 
 ### 1. Install dependencies
+
+Tested on Python 3.10.
 
 ```bash
 pip install -r requirements.txt
@@ -36,11 +38,39 @@ pip install -r requirements.txt
 
 ### 2. Training the models and hyperparameter tuning & evaluation
 
+#### To reproduce full IQP Ansatz hyperparameter sweeping experiment:
+
 ```
-python run_experiments_all.py
+bash run_all_hyperparams.sh
 ```
 
-## 📊 Results Summary
+#### To run more specific experiments:
+
+Experiment with all combinations of circuit rewriters **and** circuit-based ansatzes (fixed ansatz hyperparameters):
+
+```
+python exp_rewriter_circuit.py
+```
+
+Experiment with specified circuit-based ansatz and its hyperparameters:
+
+```
+python exp_hyperparams.py
+```
+
+Experiment with IQPAnsatz with varying hyperparameters:
+
+```
+python exp_iqp_hyperparams.py
+```
+
+Experiment with all combinations with rewriters and **Tensor** ansatzes:
+
+```
+python exp_rewriter_tensor.py
+```
+
+## Results Summary
 
 Best circuit-based performance: Sim14Ansatz + re_norm_cur_norm (100% validation accuracy)
 
@@ -50,7 +80,8 @@ Diagram simplification via rewriting significantly improves both convergence and
 
 Careful hyperparameter tuning is key to optimal model design for the average sentence complexity of the dataset.
 
-## 📚 Citation
+## Citation
+
 If you use this repository or the results in your research, please cite:
 
 ```
@@ -65,7 +96,8 @@ If you use this repository or the results in your research, please cite:
 }
 ```
 
-📬 Contact
+## Contact
+
 For questions or collaborations, contact:
 
 Jordi Del Castillo

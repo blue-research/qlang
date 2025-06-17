@@ -2,8 +2,11 @@ import numpy as np
 import pandas as pd
 import warnings
 import os
+import torch
 import matplotlib.pyplot as plt
-from datasets import load_dataset
+from lambeq import PytorchModel
+from lambeq import PytorchTrainer
+
 from lambeq import BobcatParser, Rewriter, RemoveCupsRewriter
 from lambeq import AtomicType, IQPAnsatz, MPSAnsatz, Sim14Ansatz, Sim15Ansatz, SpiderAnsatz, StronglyEntanglingAnsatz, TensorAnsatz
 from lambeq.backend.tensor import Dim
@@ -31,7 +34,7 @@ def read_data(filename):
             sentences.append(line[1:].strip())
     return labels, sentences
 
-# Define rewriter functions
+# Define rewriter functions, currying rewriter does not work
 def re(diagrams):
     rewriter = Rewriter(['prepositional_phrase', 'determiner'])
     rewritten_diagrams = [rewriter(diagram) for diagram in diagrams]
@@ -43,54 +46,47 @@ def re_norm(diagrams):
     normalised_diagrams = [diagram.normal_form() for diagram in rewritten_diagrams]
     return normalised_diagrams
 
-def re_norm_cur(diagrams):
-    rewriter = Rewriter(['prepositional_phrase', 'determiner'])
-    rewritten_diagrams = [rewriter(diagram) for diagram in diagrams]
-    normalised_diagrams = [diagram.normal_form() for diagram in rewritten_diagrams]
-    curry_functor = Rewriter(['curry'])
-    curried_diagrams = [curry_functor(diagram) for diagram in normalised_diagrams]
-    return curried_diagrams
-
-def re_norm_cur_norm(diagrams):
-    rewriter = Rewriter(['prepositional_phrase', 'determiner'])
-    rewritten_diagrams = [rewriter(diagram) for diagram in diagrams]
-    normalised_diagrams = [diagram.normal_form() for diagram in rewritten_diagrams]
-    curry_functor = Rewriter(['curry'])
-    curried_diagrams = [curry_functor(diagram) for diagram in normalised_diagrams]
-    normalised_diagrams2 = [diagram.normal_form() for diagram in curried_diagrams]
-    return normalised_diagrams2
-
 # Define training function
 def train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz):
-    model = TketModel.from_diagrams(all_circuits, backend_config=backend_config)
+    model = PytorchModel.from_diagrams(all_circuits)
     loss = BinaryCrossEntropyLoss()
-    acc = lambda y_hat, y: np.sum(np.round(y_hat) == y) / len(y) / 2  # half due to double-counting
+    # acc = lambda y_hat, y: np.sum(np.round(y_hat) == y) / len(y) / 2  # half due to double-counting
+    sig = torch.sigmoid
+    acc = lambda y_hat, y: torch.sum(torch.eq(torch.round(sig(y_hat)), y))/len(y)/2 
+    eval_metrics = {"acc": acc}
 
-    EPOCHS = 10
+    EPOCHS = 120
     BATCH_SIZE = 32
 
-    trainer = QuantumTrainer(
-        model,
-        loss_function=loss,
-        epochs=EPOCHS,
-        optimizer=SPSAOptimizer,
-        optim_hyperparams={'a': 0.05, 'c': 0.06, 'A': 0.01 * EPOCHS},
-        evaluate_functions={'acc': acc},
-        evaluate_on_train=True,
-        verbose='text',
-        seed=0
-    )
+    # trainer = QuantumTrainer(
+    #     model,
+    #     loss_function=loss,
+    #     epochs=EPOCHS,
+    #     optimizer=SPSAOptimizer,
+    #     optim_hyperparams={'a': 0.05, 'c': 0.06, 'A': 0.01 * EPOCHS},
+    #     evaluate_functions={'acc': acc},
+    #     evaluate_on_train=True,
+    #     verbose='text',
+    #     seed=0
+    # )
+
+    trainer = PytorchTrainer(
+            model=model,
+            loss_function=torch.nn.BCEWithLogitsLoss(),
+            optimizer=torch.optim.AdamW,
+            learning_rate=3e-2,
+            device=0, # use GPU, set to -1 if using CPU
+            epochs=EPOCHS,
+            evaluate_functions=eval_metrics,
+            evaluate_on_train=True,
+            verbose='text',
+            seed=0)
 
     train_dataset = Dataset(train_circuits, train_labels, batch_size=BATCH_SIZE)
     val_dataset = Dataset(dev_circuits, dev_labels, shuffle=False)
 
     trainer.fit(train_dataset, val_dataset, log_interval=1)
-    return model, trainer.train_epoch_costs, trainer.val_costs, trainer.train_eval_results['acc'], trainer.val_eval_results['acc']
-
-def evaluate_model(model, test_circuits, test_labels):
-    acc = lambda y_hat, y: np.sum(np.round(y_hat) == y) / len(y) / 2
-    test_pred = model.get_diagram_output(test_circuits).tolist()
-    return acc(test_pred, test_labels)
+    return trainer.train_epoch_costs, trainer.val_costs, trainer.train_eval_results['acc'], trainer.val_eval_results['acc']
 
 # Experiment and plot saving function
 def run_experiment_with_saving_plots():
@@ -111,16 +107,19 @@ def run_experiment_with_saving_plots():
 
             # Train model and retrieve losses and accuracies
             write_log(f"Training with {ansatz_name} and {rewriter_name}", ansatz_name, rewriter_name)
-            model, train_loss, val_loss, train_acc, val_acc = train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz)
-            
+            train_loss, val_loss, train_acc, val_acc = train_model(all_circuits, train_circuits, dev_circuits, rewriter, ansatz)
+
+            train_acc = [x.item() for x in train_acc]
+            val_acc = [x.item() for x in val_acc]
+
             # Log results
-            write_log("Train Loss: ", ansatz_name, rewriter_name)
+            write_log("Train Loss:", ansatz_name, rewriter_name)
             write_log(train_loss, ansatz_name, rewriter_name)
-            write_log("Validation Loss: ", ansatz_name, rewriter_name)
+            write_log("Validation Loss:", ansatz_name, rewriter_name)
             write_log(val_loss, ansatz_name, rewriter_name)
-            write_log("Train Accuracy: ", ansatz_name, rewriter_name)
+            write_log("Train Accuracy:", ansatz_name, rewriter_name)
             write_log(train_acc, ansatz_name, rewriter_name)
-            write_log("Validation Accuracy: ", ansatz_name, rewriter_name)
+            write_log("Validation Accuracy:", ansatz_name, rewriter_name)
             write_log(val_acc, ansatz_name, rewriter_name)
             
             # Plot losses
@@ -134,8 +133,6 @@ def run_experiment_with_saving_plots():
             axs[1, j].plot(val_acc, label="Validation Accuracy")
             axs[1, j].set_title(f"Accuracy: {ansatz_name} with {rewriter_name}")
             axs[1, j].legend()
-            
-            write_log("Test Accuracy: ", evaluate_model(model, test_circuits, test_labels))
 
         # Save the plot for the current Ansatz with all rewriters as a separate file
         plt.suptitle(f"Loss and Accuracy Curves for {ansatz_name}")
@@ -161,20 +158,13 @@ if __name__ == '__main__':
     raw_dev_diagrams = parser.sentences2diagrams(dev_data)
     raw_test_diagrams = parser.sentences2diagrams(test_data)
 
-    rewriters = [re, re_norm, re_norm_cur, re_norm_cur_norm]
+    rewriters = [re, re_norm]
+    N = AtomicType.NOUN
+    S = AtomicType.SENTENCE    
     ansatzes = [
-        IQPAnsatz({AtomicType.NOUN: 1, AtomicType.SENTENCE: 1}, n_layers=2, n_single_qubit_params=3),
-        StronglyEntanglingAnsatz({AtomicType.NOUN: 1, AtomicType.SENTENCE: 1}, n_layers=2, n_single_qubit_params=3),
-        Sim14Ansatz({AtomicType.NOUN: 1, AtomicType.SENTENCE: 1}, n_layers=2, n_single_qubit_params=3),
-        Sim15Ansatz({AtomicType.NOUN: 1, AtomicType.SENTENCE: 1}, n_layers=2, n_single_qubit_params=3)
+        SpiderAnsatz({N: Dim(2), S: Dim(2)}),
+        MPSAnsatz({N: Dim(2), S: Dim(2)}, bond_dim=3),
+        TensorAnsatz({N: Dim(2), S: Dim(2)})
     ]
-
-    shots = 8192
-    backend = AerBackend()
-    backend_config = {
-        'backend': backend,
-        'compilation': backend.default_compilation_pass(2),
-        'shots': shots
-    }
 
     run_experiment_with_saving_plots()
