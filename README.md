@@ -70,7 +70,19 @@ Experiment with all combinations with rewriters and **Tensor** ansatzes:
 python exp_rewriter_tensor.py
 ```
 
-## Results Summary
+## Results
+
+Rewriter-based Performances:
+![IQPAnsatz_loss_plots](https://github.com/user-attachments/assets/ae4519e4-a132-4677-bae7-610ea6c75422)
+
+Ansatz Hyperparameter-based Performances:
+
+<img width="329" alt="Screenshot 2025-07-08 at 6 04 09 PM" src="https://github.com/user-attachments/assets/3ac62ff6-4b98-4da3-ac4c-4754ecd50473" />
+
+Tensor-based Ansatz Comparison:
+![tensor_ansatz_performance](https://github.com/user-attachments/assets/e41727b2-8bb6-4c42-ab42-e3f5ee4f6f02)
+
+Main Findings:
 
 Best circuit-based performance: Sim14Ansatz + re_norm_cur_norm (100% validation accuracy)
 
